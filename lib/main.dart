@@ -54,6 +54,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   final List<Transaction> _transactions = [];
+  bool _showCart = false;
 
   List<Transaction> get _recentTransactions {
     return _transactions.where((tr) {
@@ -95,8 +96,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
+    final appBar = AppBar(
         title: const Text('Despesas Pessoais'),
         actions: [
           IconButton(
@@ -104,13 +104,50 @@ class _MyHomePageState extends State<MyHomePage> {
             onPressed: () => _openTransactionFormModal(context),
           ),
         ],
-      ),
+      );
+
+    final availableHeight = MediaQuery.of(context).size.height - 
+      appBar.preferredSize.height - MediaQuery.of(context).padding.top;
+    
+    bool isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
+
+    return Scaffold(
+      appBar: appBar,
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Chart(_recentTransactions),
-            TransactionList(_transactions, _removeTransaction),
+            Visibility(
+              visible: isLandscape,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text('Exibir Gráfico'),
+                  Switch(
+                    value: _showCart,
+                    onChanged: (value) {
+                      setState(() {
+                        _showCart = value;
+                      });
+                    },
+                  ),
+                ],
+              ),
+            ),
+            Visibility(
+              visible: !isLandscape || _showCart,
+              child: SizedBox(
+                height: availableHeight* (isLandscape? 0.7 : 0.3),
+                child: Chart(_recentTransactions),
+              ),
+            ),
+            Visibility(
+              visible: !isLandscape || !_showCart,
+              child: SizedBox(
+                height: availableHeight*0.7,
+                child: TransactionList(_transactions, _removeTransaction),
+              ),
+            ),
           ],
         ),
       ),

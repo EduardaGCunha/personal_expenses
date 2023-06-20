@@ -96,6 +96,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    bool isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
+
     final appBar = AppBar(
         title: const Text('Despesas Pessoais'),
         actions: [
@@ -103,13 +105,23 @@ class _MyHomePageState extends State<MyHomePage> {
             icon: const Icon(Icons.add),
             onPressed: () => _openTransactionFormModal(context),
           ),
+          Visibility(
+            visible: isLandscape,
+            child: IconButton(
+              icon: Icon(_showCart? Icons.list : Icons.pie_chart),
+              onPressed: () {
+                setState(() {
+                  _showCart = !_showCart;
+                });
+              }
+            ),
+          ),
         ],
       );
 
     final availableHeight = MediaQuery.of(context).size.height - 
       appBar.preferredSize.height - MediaQuery.of(context).padding.top;
-    
-    bool isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
+  
 
     return Scaffold(
       appBar: appBar,
@@ -117,23 +129,6 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Visibility(
-              visible: isLandscape,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text('Exibir Gráfico'),
-                  Switch(
-                    value: _showCart,
-                    onChanged: (value) {
-                      setState(() {
-                        _showCart = value;
-                      });
-                    },
-                  ),
-                ],
-              ),
-            ),
             Visibility(
               visible: !isLandscape || _showCart,
               child: SizedBox(
@@ -144,7 +139,7 @@ class _MyHomePageState extends State<MyHomePage> {
             Visibility(
               visible: !isLandscape || !_showCart,
               child: SizedBox(
-                height: availableHeight*0.7,
+                height: availableHeight*(isLandscape? 1 : 0.7),
                 child: TransactionList(_transactions, _removeTransaction),
               ),
             ),
